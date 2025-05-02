@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from './components/Login';
-import Home from './components/Home';
-import UserManager from './components/UserManager';
-import BirthdayManager from './components/BirthdayManager';
+import Login from './pages/Login';
+import Home from './pages/Home';
+import UserManager from './pages/UserManager';
+import BirthdayManager from './pages/BirthdayManager';
 
 function App() {
     return (
