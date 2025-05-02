@@ -24,13 +24,8 @@ const Login = () => {
         try {
             const response = await fetch('http://localhost:8081/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    username,
-                    password,
-                }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
             });
 
             const data = await response.json();
@@ -89,16 +84,12 @@ const Login = () => {
                             />
                         </label>
                     </div>
-                    {error && (
-                        <p className="text-red-500 mb-4">{error}</p>
-                    )}
+                    {error && <p className="text-red-500 mb-4">{error}</p>}
                     <button
                         type="submit"
                         disabled={loading}
                         className={`w-full p-3 rounded-lg text-white font-semibold transition-colors ${
-                            loading
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-blue-500 hover:bg-blue-600'
+                            loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
                         }`}
                     >
                         {loading ? 'Загрузка...' : 'Войти'}
