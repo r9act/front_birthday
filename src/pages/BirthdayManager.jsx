@@ -1,17 +1,59 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { saveUserBirthdays, getUserBirthdays } from '../api/api';
+import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
 const BirthdayManager = () => {
     const [foreignId, setForeignId] = useState('');
     const [birthdays, setBirthdays] = useState([]);
     const [newBirthday, setNewBirthday] = useState({ name: '', date: '' });
+    const [userRoles, setUserRoles] = useState([]); // Состояние для ролей
+    const navigate = useNavigate();
+
+    /**
+     * Извлечение foreignId и ролей из JWT-токена
+     */
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                console.log('Decoded JWT:', decoded); // Отладка структуры токена
+                setForeignId(decoded.sub);
+                setUserRoles(decoded.roles || []);
+            } catch (error) {
+                console.error('Invalid token:', error);
+                localStorage.removeItem('token');
+                navigate('/login');
+            }
+        }
+    }, [navigate]);
 
     const fetchBirthdays = async () => {
         try {
             const response = await getUserBirthdays(foreignId);
             setBirthdays(response.data);
         } catch (error) {
-            console.error('Ошибка:', error);
+            if (error.response) {
+                const { status, data } = error.response;
+                if (status === 401) {
+                    localStorage.removeItem('token');
+                    navigate('/login');
+                    alert('Сессия истекла. Пожалуйста, войдите снова.');
+                } else if (status === 403) {
+                    alert(data.message || 'Доступ запрещен.');
+                } else if (status === 404) {
+                    alert(data.message || 'Пользователь с указанным foreignId не найден.');
+                    setBirthdays([]);
+                } else {
+                    alert(data.message || 'Произошла ошибка при загрузке данных.');
+                    console.error('Ошибка:', status, data);
+                }
+            } else {
+                alert('Ошибка сети. Проверьте подключение.');
+                console.error('Ошибка сети:', error.message);
+            }
         }
     };
 
@@ -22,7 +64,24 @@ const BirthdayManager = () => {
             setNewBirthday({ name: '', date: '' });
             fetchBirthdays();
         } catch (error) {
-            console.error('Ошибка:', error);
+            if (error.response) {
+                const { status, data } = error.response;
+                if (status === 401) {
+                    localStorage.removeItem('token');
+                    navigate('/login');
+                    alert('Сессия истекла. Пожалуйста, войдите снова.');
+                } else if (status === 403) {
+                    alert(data.message || 'Доступ запрещен.');
+                } else if (status === 404) {
+                    alert(data.message || 'Пользователь с указанным foreignId не найден.');
+                } else {
+                    alert(data.message || 'Произошла ошибка при сохранении данных.');
+                    console.error('Ошибка:', status, data);
+                }
+            } else {
+                alert('Ошибка сети. Проверьте подключение.');
+                console.error('Ошибка сети:', error.message);
+            }
         }
     };
 

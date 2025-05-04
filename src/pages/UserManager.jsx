@@ -1,9 +1,21 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { createUser, getUserByForeignId } from '../api/api';
+import { jwtDecode } from 'jwt-decode';
 
 const UserManager = () => {
     const [foreignId, setForeignId] = useState('');
     const [user, setUser] = useState(null);
+    const [userRoles, setUserRoles] = useState([]);
+    /**
+     * достанем роль
+     */
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            const decoded = jwtDecode(token);
+            setUserRoles(decoded.roles || []);
+        }
+    }, []);
 
     const fetchUser = async () => {
         try {
@@ -25,10 +37,20 @@ const UserManager = () => {
             console.error('Ошибка:', error);
         }
     };
-
+    //TODO если роль = ROLE_ADMIN - отрисуем
     return (
         <div className="min-h-screen bg-gray-100 p-6">
             <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+                {userRoles.includes('ROLE_ADMIN') ? (
+                    <div>
+                        <p>Добро пожаловать, Админ!</p>
+                        {/* Дополнительные элементы для админа */}
+                        <button>Удалить пользователя</button>
+                        <button>Редактировать роли</button>
+                    </div>
+                ) : (
+                    <p>У вас нет прав для управления пользователями.</p>
+                )}
                 <h1 className="text-2xl font-bold mb-4">Управление пользователями</h1>
                 <div className="mb-4">
                     <input
